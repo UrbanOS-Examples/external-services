@@ -1,0 +1,6 @@
+.terraform/
+terraform.tfstate.d/
+outputs/
+
+*.out
+*.plan
