@@ -1,8 +1,0 @@
-kind: "Service"
-apiVersion: "v1"
-metadata:
-  name: "ldap-proxy"
-  namespace: {{ .Values.namespace }}
-spec:
-  type: ExternalName
-  externalName: iam-master.alm.internal.smartcolumbusos.com

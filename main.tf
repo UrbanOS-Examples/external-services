@@ -25,6 +25,14 @@ resource "local_file" "kubeconfig" {
   content = "${data.terraform_remote_state.env_remote_state.eks_cluster_kubeconfig}"
 }
 
+resource "local_file" "helm_vars" {
+  filename = "${path.module}/outputs/${terraform.workspace}.yaml"
+  content = <<EOF
+alm:
+  dns_zone: "${var.alm_dns_zone}"
+EOF
+}
+
 resource "null_resource" "helm_deploy" {
   provisioner "local-exec" {
     command = <<EOF
@@ -33,7 +41,8 @@ set -x
 export KUBECONFIG=${local_file.kubeconfig.filename}
 
 export AWS_DEFAULT_REGION=us-east-2
-helm upgrade --install external-services chart --namespace=external-services
+helm upgrade --install external-services chart --namespace=external-services \
+  --values ${local_file.helm_vars.filename}
 EOF
   }
 
@@ -62,4 +71,8 @@ variable "alm_role_arn" {
 variable "alm_state_bucket_name" {
   description = "The name of the S3 state bucket for ALM"
   default     = "scos-alm-terraform-state"
+}
+
+variable "alm_dns_zone" {
+  description = "DNS zone for alm"
 }

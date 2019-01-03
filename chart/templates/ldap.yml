@@ -4,4 +4,4 @@ metadata:
   name: "ldap"
 spec:
   type: ExternalName
-  externalName: iam-master.alm.internal.smartcolumbusos.com
+  externalName: iam-master.{{ .Values.alm.dns_zone }}
