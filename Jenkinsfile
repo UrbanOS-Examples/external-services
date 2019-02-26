@@ -24,10 +24,11 @@ node ('infrastructure') {
         }
 
         doStageIfPromoted('Deploy to Staging')  {
-            def promotionTag = scos.releaseCandidateNumber()
+            def environment = 'staging'
 
-            deployProxiesTo(environment: 'staging')
-            scos.applyAndPushGitHubTag(promotionTag)
+            deployProxiesTo(environment: environment)
+
+            scos.applyAndPushGitHubTag(environment)
 
         }
 
