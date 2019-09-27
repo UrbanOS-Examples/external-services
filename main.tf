@@ -19,17 +19,20 @@ data "terraform_remote_state" "env_remote_state" {
   }
 }
 
-
 resource "local_file" "kubeconfig" {
   filename = "${path.module}/outputs/kubeconfig"
-  content = "${data.terraform_remote_state.env_remote_state.eks_cluster_kubeconfig}"
+  content  = "${data.terraform_remote_state.env_remote_state.eks_cluster_kubeconfig}"
 }
 
 resource "local_file" "helm_vars" {
   filename = "${path.module}/outputs/${terraform.workspace}.yaml"
+
   content = <<EOF
 alm:
   dns_zone: "${var.alm_dns_zone}"
+services:
+- hostname: "iam-master.${var.alm_dns_zone}"
+  name: ldap
 EOF
 }
 
@@ -41,7 +44,9 @@ set -x
 export KUBECONFIG=${local_file.kubeconfig.filename}
 
 export AWS_DEFAULT_REGION=us-east-2
-helm upgrade --install external-services chart --namespace=external-services \
+helm repo add scdp https://smartcitiesdata.github.io/charts
+helm repo update
+helm upgrade --install external-services scdp/external-services --namespace=external-services \
   --values ${local_file.helm_vars.filename}
 EOF
   }
