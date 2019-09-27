@@ -1,7 +1,0 @@
-kind: "Service"
-apiVersion: "v1"
-metadata:
-  name: "ldap"
-spec:
-  type: ExternalName
-  externalName: iam-master.{{ .Values.alm.dns_zone }}
