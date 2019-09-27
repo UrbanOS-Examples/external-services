@@ -19,17 +19,20 @@ data "terraform_remote_state" "env_remote_state" {
   }
 }
 
-
 resource "local_file" "kubeconfig" {
   filename = "${path.module}/outputs/kubeconfig"
-  content = "${data.terraform_remote_state.env_remote_state.eks_cluster_kubeconfig}"
+  content  = "${data.terraform_remote_state.env_remote_state.eks_cluster_kubeconfig}"
 }
 
 resource "local_file" "helm_vars" {
   filename = "${path.module}/outputs/${terraform.workspace}.yaml"
+
   content = <<EOF
 alm:
   dns_zone: "${var.alm_dns_zone}"
+services:
+- hostname: "iam-master.${var.alm_dns_zone}"
+  name: ldap
 EOF
 }
 
