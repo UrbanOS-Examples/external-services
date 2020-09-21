@@ -44,7 +44,7 @@ set -x
 export KUBECONFIG=${local_file.kubeconfig.filename}
 
 export AWS_DEFAULT_REGION=us-east-2
-helm repo add scdp https://smartcitiesdata.github.io/charts
+helm repo add scdp https://datastillery.github.io/charts
 helm repo update
 helm upgrade --install external-services scdp/external-services --namespace=external-services \
   --values ${local_file.helm_vars.filename}
