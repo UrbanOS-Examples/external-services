@@ -1,27 +1,27 @@
 provider "aws" {
-  version = "1.39"
-  region  = "${var.region}"
+  version = "~> 3.0"
+  region  = var.region
 
   assume_role {
-    role_arn = "${var.role_arn}"
+    role_arn = var.role_arn
   }
 }
 
 data "terraform_remote_state" "env_remote_state" {
   backend   = "s3"
-  workspace = "${terraform.workspace}"
+  workspace = terraform.workspace
 
-  config {
-    bucket   = "${var.alm_state_bucket_name}"
+  config = {
+    bucket   = var.alm_state_bucket_name
     key      = "operating-system"
     region   = "us-east-2"
-    role_arn = "${var.alm_role_arn}"
+    role_arn = var.alm_role_arn
   }
 }
 
 resource "local_file" "kubeconfig" {
   filename = "${path.module}/outputs/kubeconfig"
-  content  = "${data.terraform_remote_state.env_remote_state.eks_cluster_kubeconfig}"
+  content  = data.terraform_remote_state.env_remote_state.outputs.eks_cluster_kubeconfig
 }
 
 resource "local_file" "helm_vars" {
@@ -34,6 +34,7 @@ services:
 - hostname: "iam-master.${var.alm_dns_zone}"
   name: ldap
 EOF
+
 }
 
 resource "null_resource" "helm_deploy" {
@@ -49,12 +50,13 @@ helm repo update
 helm upgrade --install external-services scdp/external-services --namespace=external-services \
   --values ${local_file.helm_vars.filename}
 EOF
+
   }
 
-  triggers {
+  triggers = {
     # Triggers a list of values that, when changed, will cause the resource to be recreated
     # ${uuid()} will always be different thus always executing above local-exec
-    hack_that_always_forces_null_resources_to_execute = "${uuid()}"
+    hack_that_always_forces_null_resources_to_execute = uuid()
   }
 }
 
@@ -81,3 +83,4 @@ variable "alm_state_bucket_name" {
 variable "alm_dns_zone" {
   description = "DNS zone for alm"
 }
+
